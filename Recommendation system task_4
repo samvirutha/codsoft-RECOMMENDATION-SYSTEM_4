@@ -1,0 +1,38 @@
+# RECOMMENDATION SYSTEM 
+# movie recommendation system
+
+
+import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Step 1: User ratings for South Indian movies
+data = {
+    'user_name': ['veda', 'veda', 'veda', 'dev', 'dev','dev', 'sam', 'sam', 'sam','sri','sri','sri'],
+    'movie': ['Vikram', 'Master', 'Mersal',
+              'Vikram', 'KGF','GBU',
+              'Jailer', 'Master', 'Mersal',
+              'baahubali','maveeran','GBU'],
+    'rating': [4, 4, 5, 3,4, 4, 4, 5, 5, 5, 5, 4]
+}
+
+df = pd.DataFrame(data)
+
+# Step 2: Create user-movie matrix
+user_movie_matrix = df.pivot_table(index='user_name', columns='movie', values='rating')
+user_movie_matrix.fillna(0, inplace=True)
+
+# Step 3: Movie-to-movie cosine similarity
+movie_similarity = cosine_similarity(user_movie_matrix.T)
+movie_similarity_df = pd.DataFrame(movie_similarity, index=user_movie_matrix.columns, columns=user_movie_matrix.columns)
+
+# Step 4: Recommendation function
+def recommend(movie_name, top_n=3):
+    if movie_name not in movie_similarity_df.columns:
+        return "Movie not found in dataset."
+    
+    similar_scores = movie_similarity_df[movie_name].sort_values(ascending=False)
+    return similar_scores[1:top_n+1].index.tolist()
+
+# Step 5: Test the recommender
+print("Recommended for 'Mersal':")
+print(recommend('Mersal'))
